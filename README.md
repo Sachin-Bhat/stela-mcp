@@ -1,5 +1,7 @@
 # STeLA MCP
 
+[![smithery badge](https://smithery.ai/badge/@Sachin-Bhat/stela-mcp)](https://smithery.ai/server/@Sachin-Bhat/stela-mcp)
+
 > A Python implementation of a Model Context Protocol server that provides secure access to local system operations via a standardized API interface.
 
 STeLA (Simple Terminal Language Assistant) MCP is a lightweight server that provides secure access to local machine commands and file operations via a standardized API interface. It acts as a bridge between applications and your local system, implementing the Model Context Protocol (MCP) architecture.
@@ -19,6 +21,14 @@ STeLA MCP implements the Model Context Protocol (MCP) architecture to provide a 
 * **Simple Integration**: Standard I/O interface for easy integration with various clients
 
 ## Installation
+
+### Installing via Smithery
+
+To install STeLA for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@Sachin-Bhat/stela-mcp):
+
+```bash
+npx -y @smithery/cli install @Sachin-Bhat/stela-mcp --client claude
+```
 
 ### Prerequisites
 
