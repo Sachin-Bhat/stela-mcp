@@ -2,21 +2,24 @@
 
 import os
 import subprocess
+from typing import Any
 
 
 class ShellExecutor:
     def __init__(self, working_dir: str | None = None) -> None:
         self.working_dir = working_dir or os.getcwd()
 
-    async def execute_command(self, command: str, working_dir: str | None = None) -> dict:
+    async def execute_command(self, command: str, args: list[str], working_dir: str | None = None) -> dict:
         """Execute a shell command with proper error handling and output capture."""
         if not command:
-            return {"error": "Command is required"}
+            return {"error": "Command is required", "success": False, "exit_code": -1}
 
         try:
+            # Combine command and args into a list and use shell=False for security
+            command_list = [command] + args
             process = subprocess.Popen(
-                command,
-                shell=True,
+                command_list, # Pass the list
+                shell=False,  # Set shell=False
                 cwd=working_dir or self.working_dir,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
@@ -39,19 +42,19 @@ class ShellExecutor:
                 "success": False,
             }
 
-    def change_directory(self, path: str) -> tuple[bool, str]:
+    async def change_directory(self, path: str) -> dict[str, Any]:
         """Change the working directory with validation."""
         if not path:
-            return False, "Path is required"
+            return {"success": False, "error": "Path is required"}
 
         try:
             if not os.path.exists(path):
-                return False, "Path does not exist"
+                return {"success": False, "error": "Path does not exist"}
 
             if not os.path.isdir(path):
-                return False, "Path is not a directory"
+                return {"success": False, "error": "Path is not a directory"}
 
             self.working_dir = os.path.abspath(path)
-            return True, self.working_dir
+            return {"success": True, "path": self.working_dir}
         except Exception as e:
-            return False, str(e)
+            return {"success": False, "error": str(e)}
