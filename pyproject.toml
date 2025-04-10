@@ -16,9 +16,10 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
     "mcp[cli]>=1.1.0",
@@ -34,6 +35,12 @@ dev = [
     "pytest-asyncio>=0.23.0"
 ]
 
+[project.urls]
+Homepage = "https://github.com/Sachin-Bhat/stela-mcp"
+Documentation = "https://github.com/Sachin-Bhat/stela-mcp#readme"
+Repository = "https://github.com/Sachin-Bhat/stela-mcp.git"
+Issues = "https://github.com/Sachin-Bhat/stela-mcp/issues"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/stela_mcp"]
 
@@ -45,9 +52,14 @@ include = [
 [project.scripts]
 stela-mcp = "stela_mcp.server:main"
 
+[tool.hatch.version]
+source = "regex"
+pattern = "^__version__ = [\"'](?P<version>.*)[\"']"
+path = "src/stela_mcp/__init__.py"
+
 [tool.ruff]
+line-length = 100
 target-version = "py310"
-line-length = 88
 select = [
     "E",   # pycodestyle errors
     "W",   # pycodestyle warnings
@@ -66,16 +78,12 @@ ignore = [
     "ANN102",  # Missing type annotation for cls
 ]
 
-[tool.ruff.format]
-quote-style = "double"
-indent-style = "space"
-skip-magic-trailing-comma = false
-line-ending = "auto"
+[tool.ruff.isort]
+known-first-party = ["stela_mcp"]
 
 [tool.mypy]
 python_version = "3.10"
-strict = true
-ignore_missing_imports = true
+warn_unused_configs = true
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
 check_untyped_defs = true
@@ -89,6 +97,5 @@ warn_unreachable = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-v --cov=src --cov-report=term-missing"
-asyncio_mode = "auto"
+addopts = "-v --cov=src/stela_mcp --cov-report=term-missing"
 

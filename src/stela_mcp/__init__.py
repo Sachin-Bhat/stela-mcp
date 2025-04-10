@@ -1,3 +1,5 @@
+"""Stela MCP - A Python package for MCP (Multi-Cloud Platform) operations."""
+
 from .shell import ShellExecutor
 from .filesystem import FileSystem
 
