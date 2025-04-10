@@ -1,12 +1,14 @@
-import subprocess
+"""Shell command execution implementation."""
+
 import os
-from typing import Dict, Optional, Tuple
+import subprocess
+
 
 class ShellExecutor:
-    def __init__(self, working_dir: Optional[str] = None):
+    def __init__(self, working_dir: str | None = None) -> None:
         self.working_dir = working_dir or os.getcwd()
 
-    async def execute_command(self, command: str, working_dir: Optional[str] = None) -> Dict:
+    async def execute_command(self, command: str, working_dir: str | None = None) -> dict:
         """Execute a shell command with proper error handling and output capture."""
         if not command:
             return {"error": "Command is required"}
@@ -21,7 +23,7 @@ class ShellExecutor:
                 text=True
             )
             stdout, stderr = process.communicate()
-            
+
             return {
                 "exit_code": process.returncode,
                 "stdout": stdout,
@@ -37,7 +39,7 @@ class ShellExecutor:
                 "success": False
             }
 
-    def change_directory(self, path: str) -> Tuple[bool, str]:
+    def change_directory(self, path: str) -> tuple[bool, str]:
         """Change the working directory with validation."""
         if not path:
             return False, "Path is required"
@@ -45,11 +47,11 @@ class ShellExecutor:
         try:
             if not os.path.exists(path):
                 return False, "Path does not exist"
-                
+
             if not os.path.isdir(path):
                 return False, "Path is not a directory"
-                
+
             self.working_dir = os.path.abspath(path)
             return True, self.working_dir
         except Exception as e:
-            return False, str(e) 
+            return False, str(e)

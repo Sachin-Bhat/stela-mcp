@@ -76,8 +76,6 @@ select = [
     "W",   # pycodestyle warnings
 ]
 ignore = [
-    "ANN101",  # Missing type annotation for self
-    "ANN102",  # Missing type annotation for cls
     "S602",    # subprocess with shell=True (we need this for shell commands)
 ]
 
