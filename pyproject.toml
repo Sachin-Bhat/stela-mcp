@@ -26,15 +26,6 @@ dependencies = [
     "typing-extensions>=4.13.0"
 ]
 
-[project.optional-dependencies]
-dev = [
-    "ruff>=0.3.0",
-    "mypy>=1.8.0",
-    "pytest>=8.0.0",
-    "pytest-cov>=6.1.0",
-    "pytest-asyncio>=0.23.0"
-]
-
 [project.urls]
 Homepage = "https://github.com/Sachin-Bhat/stela-mcp"
 Documentation = "https://github.com/Sachin-Bhat/stela-mcp#readme"
@@ -104,4 +95,13 @@ warn_unreachable = true
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 addopts = "-v --cov=src/stela_mcp --cov-report=term-missing"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.15.0",
+    "pytest>=8.3.5",
+    "pytest-asyncio>=0.26.0",
+    "pytest-cov>=6.1.1",
+    "ruff>=0.11.4",
+]
 
