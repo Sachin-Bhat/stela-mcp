@@ -108,13 +108,10 @@ class LocalSystemServer:
                 {
                     "name": "execute_command",
                     "description": "Execute a shell command in the current working directory",
-                    "parameters": {
+                    "inputSchema": {
                         "type": "object",
                         "properties": {
-                            "command": {
-                                "type": "string",
-                                "description": "The command to execute",
-                            },
+                            "command": {"type": "string", "description": "The command to execute"},
                             "working_dir": {
                                 "type": "string",
                                 "description": "Working directory for the command",
@@ -126,13 +123,10 @@ class LocalSystemServer:
                 {
                     "name": "change_directory",
                     "description": "Change the current working directory",
-                    "parameters": {
+                    "inputSchema": {
                         "type": "object",
                         "properties": {
-                            "path": {
-                                "type": "string",
-                                "description": "Path to change to",
-                            },
+                            "path": {"type": "string", "description": "Path to change to"}
                         },
                         "required": ["path"],
                     },
@@ -140,13 +134,10 @@ class LocalSystemServer:
                 {
                     "name": "read_file",
                     "description": "Read the contents of a file",
-                    "parameters": {
+                    "inputSchema": {
                         "type": "object",
                         "properties": {
-                            "path": {
-                                "type": "string",
-                                "description": "Path to the file to read",
-                            },
+                            "path": {"type": "string", "description": "Path to the file to read"}
                         },
                         "required": ["path"],
                     },
@@ -154,13 +145,10 @@ class LocalSystemServer:
                 {
                     "name": "write_file",
                     "description": "Write content to a file",
-                    "parameters": {
+                    "inputSchema": {
                         "type": "object",
                         "properties": {
-                            "path": {
-                                "type": "string",
-                                "description": "Path to the file to write",
-                            },
+                            "path": {"type": "string", "description": "Path to the file to write"},
                             "content": {
                                 "type": "string",
                                 "description": "Content to write to the file",
@@ -172,13 +160,13 @@ class LocalSystemServer:
                 {
                     "name": "list_directory",
                     "description": "List contents of a directory",
-                    "parameters": {
+                    "inputSchema": {
                         "type": "object",
                         "properties": {
                             "path": {
                                 "type": "string",
                                 "description": "Path to the directory to list",
-                            },
+                            }
                         },
                         "required": ["path"],
                     },
@@ -186,13 +174,13 @@ class LocalSystemServer:
                 {
                     "name": "create_directory",
                     "description": "Create a new directory",
-                    "parameters": {
+                    "inputSchema": {
                         "type": "object",
                         "properties": {
                             "path": {
                                 "type": "string",
                                 "description": "Path to the directory to create",
-                            },
+                            }
                         },
                         "required": ["path"],
                     },
@@ -200,17 +188,11 @@ class LocalSystemServer:
                 {
                     "name": "move_file",
                     "description": "Move or rename a file or directory",
-                    "parameters": {
+                    "inputSchema": {
                         "type": "object",
                         "properties": {
-                            "source": {
-                                "type": "string",
-                                "description": "Source path",
-                            },
-                            "destination": {
-                                "type": "string",
-                                "description": "Destination path",
-                            },
+                            "source": {"type": "string", "description": "Source path"},
+                            "destination": {"type": "string", "description": "Destination path"},
                         },
                         "required": ["source", "destination"],
                     },
@@ -218,17 +200,14 @@ class LocalSystemServer:
                 {
                     "name": "search_files",
                     "description": "Search for files matching a pattern",
-                    "parameters": {
+                    "inputSchema": {
                         "type": "object",
                         "properties": {
                             "path": {
                                 "type": "string",
                                 "description": "Base directory to search in",
                             },
-                            "pattern": {
-                                "type": "string",
-                                "description": "Search pattern",
-                            },
+                            "pattern": {"type": "string", "description": "Search pattern"},
                         },
                         "required": ["path", "pattern"],
                     },
@@ -236,13 +215,10 @@ class LocalSystemServer:
                 {
                     "name": "directory_tree",
                     "description": "Generate a recursive tree view of a directory",
-                    "parameters": {
+                    "inputSchema": {
                         "type": "object",
                         "properties": {
-                            "path": {
-                                "type": "string",
-                                "description": "Path to the directory",
-                            },
+                            "path": {"type": "string", "description": "Path to the directory"}
                         },
                         "required": ["path"],
                     },
@@ -254,7 +230,7 @@ async def main() -> None:
     # Create the server with proper initialization
     server: Server = Server(
         name="StelaMCP",
-        version="0.3.2",
+        version="0.3.3",
         instructions="A server for local system operations",
     )
 
