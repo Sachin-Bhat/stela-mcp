@@ -55,7 +55,7 @@ pip install pyinstaller
 
 2. Create the binary:
 ```bash
-pyinstaller --onefile src/server.py --name stela-mcp
+pyinstaller --onefile src/stella_mcp//server.py --name stela-mcp
 ```
 
 The binary will be created in the `dist` directory.
@@ -80,7 +80,7 @@ stela-mcp/
 
 Run the server using:
 ```bash
-uv run python -m src.server
+uv run python -m src.stella_mcp.server
 ```
 
 The server will start and listen for connections through standard I/O.
