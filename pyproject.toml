@@ -22,8 +22,11 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
+    "fastapi>=0.115.12",
+    "loguru>=0.7.3",
     "mcp[cli]>=1.1.0",
-    "typing-extensions>=4.13.0"
+    "psutil>=7.0.0",
+    "typing-extensions>=4.13.0",
 ]
 
 [project.urls]
