@@ -26,6 +26,7 @@ class LocalSystemServer:
 
     def _register_tools(self) -> None:
         """Register all tools with the server."""
+
         @self.server.call_tool()  # type: ignore[misc]
         async def execute_command(
             request: Request[RequestParams, str], arguments: dict[str, Any]
@@ -104,9 +105,7 @@ class LocalSystemServer:
 async def main() -> None:
     # Create the server with proper initialization
     server: Server = Server(
-        name="StelaMCP",
-        version="0.1.0",
-        instructions="A server for local system operations"
+        name="StelaMCP", version="0.1.0", instructions="A server for local system operations"
     )
 
     # Create our server implementation
@@ -115,11 +114,7 @@ async def main() -> None:
     # Get the stdio transport
     async with stdio_server() as (read_stream, write_stream):
         # Run the server with initialization options
-        await server.run(
-            read_stream,
-            write_stream,
-            server.create_initialization_options()
-        )
+        await server.run(read_stream, write_stream, server.create_initialization_options())
 
 
 if __name__ == "__main__":
