@@ -1,6 +1,6 @@
 """Stela MCP - A Python implementation of a Model Context Protocol server."""
 
-__version__ = "0.3.1"
+__version__ = "0.3.2"
 
 from .filesystem import FileSystem
 from .shell import ShellExecutor

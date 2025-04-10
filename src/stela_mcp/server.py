@@ -102,161 +102,159 @@ class LocalSystemServer:
             return await self.filesystem.get_directory_tree(arguments.get("path", ""))
 
         @self.server.list_tools()  # type: ignore[misc]
-        async def list_tools() -> dict[str, Any]:
+        async def list_tools() -> list[dict[str, Any]]:
             """List all available tools."""
-            return {
-                "tools": [
-                    {
-                        "name": "execute_command",
-                        "description": "Execute a shell command in the current working directory",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "command": {
-                                    "type": "string",
-                                    "description": "The command to execute",
-                                },
-                                "working_dir": {
-                                    "type": "string",
-                                    "description": "Working directory for the command",
-                                },
+            return [
+                {
+                    "name": "execute_command",
+                    "description": "Execute a shell command in the current working directory",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "command": {
+                                "type": "string",
+                                "description": "The command to execute",
                             },
-                            "required": ["command"],
-                        },
-                    },
-                    {
-                        "name": "change_directory",
-                        "description": "Change the current working directory",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "path": {
-                                    "type": "string",
-                                    "description": "Path to change to",
-                                },
+                            "working_dir": {
+                                "type": "string",
+                                "description": "Working directory for the command",
                             },
-                            "required": ["path"],
                         },
+                        "required": ["command"],
                     },
-                    {
-                        "name": "read_file",
-                        "description": "Read the contents of a file",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "path": {
-                                    "type": "string",
-                                    "description": "Path to the file to read",
-                                },
+                },
+                {
+                    "name": "change_directory",
+                    "description": "Change the current working directory",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "path": {
+                                "type": "string",
+                                "description": "Path to change to",
                             },
-                            "required": ["path"],
                         },
+                        "required": ["path"],
                     },
-                    {
-                        "name": "write_file",
-                        "description": "Write content to a file",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "path": {
-                                    "type": "string",
-                                    "description": "Path to the file to write",
-                                },
-                                "content": {
-                                    "type": "string",
-                                    "description": "Content to write to the file",
-                                },
+                },
+                {
+                    "name": "read_file",
+                    "description": "Read the contents of a file",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "path": {
+                                "type": "string",
+                                "description": "Path to the file to read",
                             },
-                            "required": ["path", "content"],
                         },
+                        "required": ["path"],
                     },
-                    {
-                        "name": "list_directory",
-                        "description": "List contents of a directory",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "path": {
-                                    "type": "string",
-                                    "description": "Path to the directory to list",
-                                },
+                },
+                {
+                    "name": "write_file",
+                    "description": "Write content to a file",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "path": {
+                                "type": "string",
+                                "description": "Path to the file to write",
                             },
-                            "required": ["path"],
-                        },
-                    },
-                    {
-                        "name": "create_directory",
-                        "description": "Create a new directory",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "path": {
-                                    "type": "string",
-                                    "description": "Path to the directory to create",
-                                },
+                            "content": {
+                                "type": "string",
+                                "description": "Content to write to the file",
                             },
-                            "required": ["path"],
                         },
+                        "required": ["path", "content"],
                     },
-                    {
-                        "name": "move_file",
-                        "description": "Move or rename a file or directory",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "source": {
-                                    "type": "string",
-                                    "description": "Source path",
-                                },
-                                "destination": {
-                                    "type": "string",
-                                    "description": "Destination path",
-                                },
+                },
+                {
+                    "name": "list_directory",
+                    "description": "List contents of a directory",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "path": {
+                                "type": "string",
+                                "description": "Path to the directory to list",
                             },
-                            "required": ["source", "destination"],
                         },
+                        "required": ["path"],
                     },
-                    {
-                        "name": "search_files",
-                        "description": "Search for files matching a pattern",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "path": {
-                                    "type": "string",
-                                    "description": "Base directory to search in",
-                                },
-                                "pattern": {
-                                    "type": "string",
-                                    "description": "Search pattern",
-                                },
+                },
+                {
+                    "name": "create_directory",
+                    "description": "Create a new directory",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "path": {
+                                "type": "string",
+                                "description": "Path to the directory to create",
                             },
-                            "required": ["path", "pattern"],
                         },
+                        "required": ["path"],
                     },
-                    {
-                        "name": "directory_tree",
-                        "description": "Generate a recursive tree view of a directory",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "path": {
-                                    "type": "string",
-                                    "description": "Path to the directory",
-                                },
+                },
+                {
+                    "name": "move_file",
+                    "description": "Move or rename a file or directory",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "source": {
+                                "type": "string",
+                                "description": "Source path",
                             },
-                            "required": ["path"],
+                            "destination": {
+                                "type": "string",
+                                "description": "Destination path",
+                            },
                         },
+                        "required": ["source", "destination"],
                     },
-                ],
-            }
+                },
+                {
+                    "name": "search_files",
+                    "description": "Search for files matching a pattern",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "path": {
+                                "type": "string",
+                                "description": "Base directory to search in",
+                            },
+                            "pattern": {
+                                "type": "string",
+                                "description": "Search pattern",
+                            },
+                        },
+                        "required": ["path", "pattern"],
+                    },
+                },
+                {
+                    "name": "directory_tree",
+                    "description": "Generate a recursive tree view of a directory",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "path": {
+                                "type": "string",
+                                "description": "Path to the directory",
+                            },
+                        },
+                        "required": ["path"],
+                    },
+                },
+            ]
 
 
 async def main() -> None:
     # Create the server with proper initialization
     server: Server = Server(
         name="StelaMCP",
-        version="0.3.1",
+        version="0.3.2",
         instructions="A server for local system operations",
     )
 
