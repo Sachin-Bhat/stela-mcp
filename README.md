@@ -102,7 +102,7 @@ To use STeLA MCP with Claude Desktop:
 1. Option 1: Using Python directly
    - Start the server using:
      ```bash
-     uv run python -m src.server
+     uv run python -m src.stela_mcp.server
      ```
    - In Claude Desktop:
      - Go to Settings
@@ -111,7 +111,7 @@ To use STeLA MCP with Claude Desktop:
      - Enter the following configuration:
        - **Name**: STeLA MCP
        - **Path**: The absolute path to your Python executable (e.g., `/home/username/.venv/bin/python`)
-       - **Arguments**: `-m src.server`
+       - **Arguments**: `-m src.stela_mcp.server`
        - **Working Directory**: The path to your STeLA MCP project directory
 
 2. Option 2: Using the binary
