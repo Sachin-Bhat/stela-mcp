@@ -9,8 +9,8 @@ from mcp.types import (
     Request,
     RequestParams
 )
-from stela_mcp.shell import ShellExecutor
-from stela_mcp.filesystem import FileSystem
+from .shell import ShellExecutor
+from .filesystem import FileSystem
 
 class LocalSystemServer:
     def __init__(self, server: Server):
