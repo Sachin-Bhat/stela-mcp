@@ -14,11 +14,7 @@ class FileSystem:
         try:
             full_path = self._resolve_path(path)
             with open(full_path) as f:
-                return {
-                    "success": True,
-                    "content": f.read(),
-                    "path": str(full_path)
-                }
+                return {"success": True, "content": f.read(), "path": str(full_path)}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
@@ -26,7 +22,7 @@ class FileSystem:
         """Write content to a file."""
         try:
             full_path = self._resolve_path(path)
-            with open(full_path, 'w') as f:
+            with open(full_path, "w") as f:
                 f.write(content)
             return {"success": True, "path": str(full_path)}
         except Exception as e:
@@ -46,24 +42,21 @@ class FileSystem:
                     "success": True,
                     "type": "file",
                     "path": str(path_obj),
-                    "info": self._get_file_info(path_obj)
+                    "info": self._get_file_info(path_obj),
                 }
 
             items = []
             for item in path_obj.iterdir():
-                items.append({
-                    "name": item.name,
-                    "type": "file" if item.is_file() else "directory",
-                    "path": str(item),
-                    "info": self._get_file_info(item)
-                })
+                items.append(
+                    {
+                        "name": item.name,
+                        "type": "file" if item.is_file() else "directory",
+                        "path": str(item),
+                        "info": self._get_file_info(item),
+                    }
+                )
 
-            return {
-                "success": True,
-                "type": "directory",
-                "path": str(path_obj),
-                "items": items
-            }
+            return {"success": True, "type": "directory", "path": str(path_obj), "items": items}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
@@ -99,12 +92,14 @@ class FileSystem:
 
             matches = []
             for item in full_path.rglob(pattern):
-                matches.append({
-                    "name": item.name,
-                    "type": "file" if item.is_file() else "directory",
-                    "path": str(item),
-                    "info": self._get_file_info(item)
-                })
+                matches.append(
+                    {
+                        "name": item.name,
+                        "type": "file" if item.is_file() else "directory",
+                        "path": str(item),
+                        "info": self._get_file_info(item),
+                    }
+                )
 
             return {"success": True, "matches": matches}
         except Exception as e:
@@ -147,5 +142,5 @@ class FileSystem:
             "size": stat.st_size,
             "created": datetime.fromtimestamp(stat.st_ctime).isoformat(),
             "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
-            "permissions": oct(stat.st_mode)[-3:]
+            "permissions": oct(stat.st_mode)[-3:],
         }

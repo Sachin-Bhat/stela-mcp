@@ -20,7 +20,7 @@ class ShellExecutor:
                 cwd=working_dir or self.working_dir,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                text=True
+                text=True,
             )
             stdout, stderr = process.communicate()
 
@@ -28,7 +28,7 @@ class ShellExecutor:
                 "exit_code": process.returncode,
                 "stdout": stdout,
                 "stderr": stderr,
-                "success": process.returncode == 0
+                "success": process.returncode == 0,
             }
         except Exception as e:
             return {
@@ -36,7 +36,7 @@ class ShellExecutor:
                 "exit_code": -1,
                 "stdout": "",
                 "stderr": str(e),
-                "success": False
+                "success": False,
             }
 
     def change_directory(self, path: str) -> tuple[bool, str]:

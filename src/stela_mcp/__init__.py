@@ -7,5 +7,6 @@ from .shell import ShellExecutor
 
 __all__ = ["ShellExecutor", "FileSystem"]
 
+
 def hello() -> str:
     return "Hello from stela-mcp!"
