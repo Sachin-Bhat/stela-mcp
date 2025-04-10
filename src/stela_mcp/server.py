@@ -1,16 +1,12 @@
 """MCP server implementation."""
 
-from typing import Any, Dict, TypeVar
+from typing import Any, TypeVar
 
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import (
-    PromptsCapability,
     Request,
     RequestParams,
-    ResourcesCapability,
-    ServerCapabilities,
-    ToolsCapability,
 )
 
 from .filesystem import FileSystem
@@ -32,8 +28,8 @@ class LocalSystemServer:
         """Register all tools with the server."""
         @self.server.call_tool()  # type: ignore[misc]
         async def execute_command(
-            request: Request[RequestParams, str], arguments: Dict[str, Any]
-        ) -> Dict[str, Any]:
+            request: Request[RequestParams, str], arguments: dict[str, Any]
+        ) -> dict[str, Any]:
             """Execute a shell command in the current working directory."""
             return await self.shell.execute_command(
                 arguments.get("command", ""), arguments.get("working_dir")
@@ -41,8 +37,8 @@ class LocalSystemServer:
 
         @self.server.call_tool()  # type: ignore[misc]
         async def change_directory(
-            request: Request[RequestParams, str], arguments: Dict[str, Any]
-        ) -> Dict[str, Any]:
+            request: Request[RequestParams, str], arguments: dict[str, Any]
+        ) -> dict[str, Any]:
             """Change the current working directory."""
             success, result = self.shell.change_directory(arguments.get("path", ""))
             if success:
@@ -51,15 +47,15 @@ class LocalSystemServer:
 
         @self.server.call_tool()  # type: ignore[misc]
         async def read_file(
-            request: Request[RequestParams, str], arguments: Dict[str, Any]
-        ) -> Dict[str, Any]:
+            request: Request[RequestParams, str], arguments: dict[str, Any]
+        ) -> dict[str, Any]:
             """Read the contents of a file."""
             return await self.filesystem.read_file(arguments.get("path", ""))
 
         @self.server.call_tool()  # type: ignore[misc]
         async def write_file(
-            request: Request[RequestParams, str], arguments: Dict[str, Any]
-        ) -> Dict[str, Any]:
+            request: Request[RequestParams, str], arguments: dict[str, Any]
+        ) -> dict[str, Any]:
             """Write content to a file."""
             return await self.filesystem.write_file(
                 arguments.get("path", ""), arguments.get("content", "")
@@ -67,22 +63,22 @@ class LocalSystemServer:
 
         @self.server.call_tool()  # type: ignore[misc]
         async def list_directory(
-            request: Request[RequestParams, str], arguments: Dict[str, Any]
-        ) -> Dict[str, Any]:
+            request: Request[RequestParams, str], arguments: dict[str, Any]
+        ) -> dict[str, Any]:
             """List contents of a directory."""
             return await self.filesystem.list_directory(arguments.get("path", ""))
 
         @self.server.call_tool()  # type: ignore[misc]
         async def create_directory(
-            request: Request[RequestParams, str], arguments: Dict[str, Any]
-        ) -> Dict[str, Any]:
+            request: Request[RequestParams, str], arguments: dict[str, Any]
+        ) -> dict[str, Any]:
             """Create a new directory."""
             return await self.filesystem.create_directory(arguments.get("path", ""))
 
         @self.server.call_tool()  # type: ignore[misc]
         async def move_file(
-            request: Request[RequestParams, str], arguments: Dict[str, Any]
-        ) -> Dict[str, Any]:
+            request: Request[RequestParams, str], arguments: dict[str, Any]
+        ) -> dict[str, Any]:
             """Move or rename a file or directory."""
             return await self.filesystem.move_file(
                 arguments.get("source", ""), arguments.get("destination", "")
@@ -90,8 +86,8 @@ class LocalSystemServer:
 
         @self.server.call_tool()  # type: ignore[misc]
         async def search_files(
-            request: Request[RequestParams, str], arguments: Dict[str, Any]
-        ) -> Dict[str, Any]:
+            request: Request[RequestParams, str], arguments: dict[str, Any]
+        ) -> dict[str, Any]:
             """Search for files matching a pattern."""
             return await self.filesystem.search_files(
                 arguments.get("path", ""), arguments.get("pattern", "")
@@ -99,8 +95,8 @@ class LocalSystemServer:
 
         @self.server.call_tool()  # type: ignore[misc]
         async def directory_tree(
-            request: Request[RequestParams, str], arguments: Dict[str, Any]
-        ) -> Dict[str, Any]:
+            request: Request[RequestParams, str], arguments: dict[str, Any]
+        ) -> dict[str, Any]:
             """Generate a recursive tree view of a directory."""
             return await self.filesystem.get_directory_tree(arguments.get("path", ""))
 
