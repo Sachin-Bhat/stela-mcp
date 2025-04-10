@@ -32,7 +32,7 @@ npx -y @smithery/cli install @Sachin-Bhat/stela-mcp --client claude
 
 ### Prerequisites
 
-* Python 3.12 or higher
+* Python 3.10 - 3.12
 * pip or uv package manager
 
 ### Installation Steps
