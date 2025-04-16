@@ -25,7 +25,7 @@ class LocalSystemServer:
         # Initialize shell executor with the actual system working directory
         self.shell = ShellExecutor()
         self.filesystem = FileSystem()
-        
+
         # Use the actual system working directory for security manager
         current_dir = os.getcwd()
         self.security = SecurityManager(
