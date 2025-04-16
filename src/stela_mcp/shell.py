@@ -7,7 +7,8 @@ from typing import Any
 
 class ShellExecutor:
     def __init__(self, working_dir: str | None = None) -> None:
-        self.working_dir = working_dir or os.getcwd()
+        # Always use the actual system working directory
+        self.working_dir = os.getcwd()
 
     async def execute_command(
         self, command: str, args: list[str], working_dir: str | None = None
@@ -58,6 +59,8 @@ class ShellExecutor:
             if not os.path.isdir(path):
                 return {"success": False, "error": "Path is not a directory"}
 
+            # Update both the instance variable and change the actual working directory
+            os.chdir(path)
             self.working_dir = os.path.abspath(path)
             return {"success": True, "path": self.working_dir}
         except Exception as e:

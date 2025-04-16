@@ -18,14 +18,18 @@ class LocalSystemServer:
     def __init__(self) -> None:
         self.server: Server = Server(
             name="StelaMCP",
-            version="0.4.0",
+            version="0.4.1",
             instructions="A server for local system operations",
         )
 
+        # Initialize shell executor with the actual system working directory
         self.shell = ShellExecutor()
         self.filesystem = FileSystem()
+        
+        # Use the actual system working directory for security manager
+        current_dir = os.getcwd()
         self.security = SecurityManager(
-            allowed_dir=os.getenv("ALLOWED_DIR", os.getcwd()),
+            allowed_dir=os.getenv("ALLOWED_DIR", current_dir),
             security_config=load_security_config(),
         )
 
