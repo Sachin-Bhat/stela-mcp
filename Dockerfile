@@ -3,12 +3,8 @@
 # Use an official Python runtime as a parent image
 FROM python:3.12-slim
 
-# Create a non-root user
-RUN useradd -m -u 1000 appuser
-USER appuser
-
-# Set working directory to user's home
-WORKDIR /home/appuser
+# Set working directory
+WORKDIR /app
 
 # Install system dependencies if necessary
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -16,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the project files into the container
-COPY . /home/appuser/app
+COPY . /app
 
 # Upgrade pip
 RUN pip install --upgrade pip
