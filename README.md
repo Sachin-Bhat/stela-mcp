@@ -19,6 +19,10 @@ STeLA MCP implements the Model Context Protocol (MCP) architecture to provide a 
 * **Robust Error Handling**: Detailed error messages and validation
 * **Comprehensive Output**: Capture and return both stdout and stderr
 * **Simple Integration**: Standard I/O interface for easy integration with various clients
+* **Multi-Directory Support**: Configure multiple allowed directories for file operations
+* **Security-First Design**: Strict path validation and command execution controls
+* **File Search**: Search for files matching a pattern
+* **File Edit**: Make selective edits to a file
 
 ## Installation
 
@@ -70,6 +74,58 @@ pyinstaller --onefile src/stella_mcp//server.py --name stela-mcp
 
 The binary will be created in the `dist` directory.
 
+## Configuration
+
+STeLA MCP can be configured using environment variables:
+
+### Directory Access Control
+
+* `ALLOWED_DIRS` (Required): Comma-separated list of directories where file operations are allowed
+  * Example: `/home/user/project,/home/user/docs`
+  * Default: Current working directory if not specified
+  * Note: All paths must be absolute
+
+* `ALLOWED_DIR` (Optional): Primary directory for command execution context
+  * Example: `/home/user/project`
+  * Default: First directory from `ALLOWED_DIRS` or current working directory
+  * Note: This is separate from `ALLOWED_DIRS` and controls command execution context
+
+### Command Execution Security
+
+* `ALLOWED_COMMANDS` (Optional): Comma-separated list of allowed shell commands
+  * Example: `ls,cat,pwd,echo`
+  * Default: `ls,cat,pwd,echo`
+  * Special value: `all` to allow any command (not recommended)
+
+* `ALLOWED_FLAGS` (Optional): Comma-separated list of allowed command flags
+  * Example: `-l,-a,-h,--help`
+  * Default: `-l,-a,-h,--help`
+  * Special value: `all` to allow any flag (not recommended)
+
+* `MAX_COMMAND_LENGTH` (Optional): Maximum length of command strings
+  * Example: `1024`
+  * Default: `1024`
+  * Note: Prevents command injection via overly long strings
+
+* `COMMAND_TIMEOUT` (Optional): Maximum execution time for commands in seconds
+  * Example: `60`
+  * Default: `60`
+  * Note: Prevents hanging commands
+
+### Example Configuration
+
+```bash
+# Directory access
+export ALLOWED_DIRS="/home/user/project,/home/user/docs"
+export ALLOWED_DIR="/home/user/project"
+
+# Command execution
+export ALLOWED_COMMANDS="ls,cat,pwd,echo"
+export ALLOWED_FLAGS="-l,-a,-h,--help"
+export MAX_COMMAND_LENGTH=1024
+export COMMAND_TIMEOUT=60
+```
+
 ## Project Structure
 
 ```
@@ -78,7 +134,8 @@ stela-mcp/
 │   ├── stela_mcp/
 │   │   ├── __init__.py
 │   │   ├── shell.py        # Shell command execution
-│   │   └── filesystem.py   # File system operations
+│   │   ├── filesystem.py   # File system operations
+│   │   └── security.py     # Security configuration
 │   └── server.py           # Main server implementation
 ├── pyproject.toml          # Project configuration
 └── README.md
@@ -170,6 +227,16 @@ Reads the contents of a file.
 * On success: File contents
 * On failure: Error message
 
+##### read_multiple_files
+Reads multiple files simultaneously.
+
+**Parameters:**
+* `paths` (array, required): List of file paths to read
+
+**Returns:**
+* On success: Combined contents of all files
+* On failure: Error message and partial results
+
 ##### write_file
 Writes content to a file.
 
@@ -179,6 +246,19 @@ Writes content to a file.
 
 **Returns:**
 * On success: Success message
+* On failure: Error message
+
+##### edit_file
+Makes selective edits to a file.
+
+**Parameters:**
+* `path` (string, required): Path to the file to edit
+* `edits` (array, required): List of edit operations
+  * Each edit contains `oldText` and `newText`
+* `dryRun` (boolean, optional): Preview changes without applying
+
+**Returns:**
+* On success: Git-style diff of changes
 * On failure: Error message
 
 ##### list_directory
@@ -218,6 +298,7 @@ Searches for files matching a pattern.
 **Parameters:**
 * `path` (string, required): Starting path for the search
 * `pattern` (string, required): Search pattern to match file and directory names
+* `excludePatterns` (array, optional): List of glob patterns to exclude
 
 **Returns:**
 * On success: List of matching files
@@ -233,6 +314,36 @@ Generates a recursive tree view of files and directories.
 * On success: JSON structure representing the directory tree
 * On failure: Error message
 
+##### get_file_info
+Retrieves detailed metadata about a file or directory.
+
+**Parameters:**
+* `path` (string, required): Path to the file or directory
+
+**Returns:**
+* On success: File/directory metadata
+* On failure: Error message
+
+##### list_allowed_directories
+Lists all directories the server is allowed to access.
+
+**Parameters:**
+* None
+
+**Returns:**
+* On success: List of allowed directories
+* On failure: Error message
+
+##### show_security_rules
+Shows current security configuration.
+
+**Parameters:**
+* None
+
+**Returns:**
+* On success: Security configuration details
+* On failure: Error message
+
 ## Security Considerations
 
 STeLA MCP provides direct access to execute commands and file operations on the local system. Consider the following security practices:
@@ -242,6 +353,8 @@ STeLA MCP provides direct access to execute commands and file operations on the 
 * Consider implementing additional authorization mechanisms for production use
 * Be cautious about which directories you allow command execution and file operations in
 * Implement path validation to prevent unauthorized access to system files
+* Use the most restrictive configuration possible for your use case
+* Regularly review and update allowed commands and directories
 
 ### Platform-Specific Security Notes
 
@@ -249,11 +362,13 @@ STeLA MCP provides direct access to execute commands and file operations on the 
 * Run with a dedicated user with limited permissions
 * Consider using a chroot environment to restrict file system access
 * Use `chmod` to restrict executable permissions
+* Consider using SELinux/AppArmor for additional security
 
 #### Windows
 * Run as a standard user, not an administrator
 * Consider using Windows Security features to restrict access
 * Use folder/file permissions to limit access to sensitive directories
+* Consider using Windows Defender Application Control
 
 ## Development
 
