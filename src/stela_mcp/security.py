@@ -1,40 +1,35 @@
-"""Security module for Stela MCP."""
+"""Security module for Stela MCP command execution."""
 
 import os
 import shlex
-from dataclasses import dataclass
+from typing import Set
+from pydantic import BaseModel
 
 
 class CommandError(Exception):
     """Base exception for command-related errors."""
-
     pass
 
 
 class CommandSecurityError(CommandError):
     """Security violation errors."""
-
     pass
 
 
 class CommandExecutionError(CommandError):
     """Command execution errors."""
-
     pass
 
 
 class CommandTimeoutError(CommandError):
     """Command timeout errors."""
-
     pass
 
 
-@dataclass
-class SecurityConfig:
+class SecurityConfig(BaseModel):
     """Security configuration for command execution."""
-
-    allowed_commands: set[str]
-    allowed_flags: set[str]
+    allowed_commands: Set[str]
+    allowed_flags: Set[str]
     max_command_length: int
     command_timeout: int
     allow_all_commands: bool = False
@@ -42,35 +37,52 @@ class SecurityConfig:
 
 
 class SecurityManager:
-    def __init__(self, allowed_dir: str, security_config: SecurityConfig) -> None:
-        if not allowed_dir or not os.path.exists(allowed_dir):
-            raise ValueError("Valid ALLOWED_DIR is required")
-        self.allowed_dir = os.path.abspath(os.path.realpath(allowed_dir))
+    """Manages security for shell command execution within a primary allowed directory."""
+    def __init__(self, primary_allowed_dir: str, security_config: SecurityConfig) -> None:
+        """
+        Initializes the SecurityManager.
+
+        Args:
+            primary_allowed_dir: The single, primary directory context for command execution
+                                 and basic path argument validation. Must be an existing directory.
+            security_config: The security configuration settings.
+        """
+        if not primary_allowed_dir or not os.path.isdir(primary_allowed_dir): # Check if it's a directory
+            raise ValueError(f"Valid, existing primary allowed directory is required, got: {primary_allowed_dir}")
+        # Resolve and store the absolute real path of the primary allowed directory
+        self.primary_allowed_dir = os.path.abspath(os.path.realpath(primary_allowed_dir))
         self.security_config = security_config
+        print(f"SecurityManager initialized for command execution in: {self.primary_allowed_dir}") # Added log
 
-    def _normalize_path(self, path: str) -> str:
-        """Normalizes a path and ensures it's within allowed directory."""
+    def _normalize_path_for_command_arg(self, path: str) -> str:
+        """
+        Normalizes a path *provided as a command argument* and ensures it's
+        within the primary allowed directory for command execution safety.
+        This is a basic check; detailed filesystem access is handled by FileSystem.
+        """
         try:
-            if os.path.isabs(path):
-                # If absolute path, check directly
-                real_path = os.path.abspath(os.path.realpath(path))
-            else:
-                # If relative path, combine with allowed_dir first
-                real_path = os.path.abspath(os.path.realpath(os.path.join(self.allowed_dir, path)))
+            # Resolve relative paths against the primary allowed directory
+            if not os.path.isabs(path):
+                path = os.path.join(self.primary_allowed_dir, path)
 
+            # Get the real, absolute path (resolves symlinks)
+            real_path = os.path.abspath(os.path.realpath(path))
+
+            # Perform the safety check against the primary directory
             if not self._is_path_safe(real_path):
                 raise CommandSecurityError(
-                    f"Path '{path}' is outside of allowed directory: {self.allowed_dir}"
+                    f"Path argument '{path}' resolves outside of the allowed command execution directory: {self.primary_allowed_dir}"
                 )
 
             return real_path
         except CommandSecurityError:
             raise
         except Exception as e:
-            raise CommandSecurityError(f"Invalid path '{path}': {str(e)}") from e
+            # Catch potential errors during path resolution (e.g., invalid chars)
+            raise CommandSecurityError(f"Invalid path argument '{path}': {str(e)}") from e
 
     def validate_command(self, command_string: str) -> tuple[str, list[str]]:
-        """Validates and parses a command string for security and formatting."""
+        """Validates a command string for allowed commands, flags, and basic path argument safety."""
         # Check for shell operators that we don't support
         shell_operators = ["&&", "||", "|", ">", ">>", "<", "<<", ";"]
         for operator in shell_operators:
@@ -103,45 +115,106 @@ class SecurityManager:
                     validated_args.append(arg)
                     continue
 
-                # For any path-like argument, validate it
-                if "/" in arg or "\\" in arg or os.path.isabs(arg) or arg == ".":
-                    normalized_path = self._normalize_path(arg)
-                    validated_args.append(normalized_path)
+                # Enhanced path-like argument detection
+                is_potentially_path_like = (
+                    # Basic path indicators
+                    "/" in arg or "\\" in arg or 
+                    os.path.isabs(arg) or 
+                    arg == "." or 
+                    arg.startswith("~") or
+                    # Additional path-like patterns
+                    arg.startswith("./") or
+                    arg.startswith("../") or
+                    # Check for common file extensions
+                    any(arg.endswith(ext) for ext in [".txt", ".py", ".sh", ".md", ".json", ".yaml", ".yml"]) or
+                    # Check for common directory indicators
+                    arg.endswith("/") or
+                    # Check for environment variable expansion
+                    "$" in arg or "%" in arg
+                )
+
+                if is_potentially_path_like:
+                    try:
+                        # Attempt to resolve and validate the path
+                        normalized_path = self._normalize_path_for_command_arg(arg)
+                        
+                        # Additional safety checks
+                        if not os.path.exists(normalized_path):
+                            # Only warn for non-existent paths if they're not clearly intended to be created
+                            if not any(arg.endswith(ext) for ext in [".txt", ".py", ".sh", ".md", ".json", ".yaml", ".yml"]):
+                                print(f"Warning: Path '{normalized_path}' does not exist but may be created by the command")
+                        
+                        # Check for common dangerous patterns
+                        if ".." in normalized_path:
+                            print(f"Warning: Path contains parent directory reference: {normalized_path}")
+                        
+                        validated_args.append(normalized_path)
+                    except CommandSecurityError:
+                        raise
+                    except Exception as e:
+                        raise CommandSecurityError(f"Failed to validate path argument '{arg}': {str(e)}") from e
                 else:
-                    # For non-path arguments, add them as-is
+                    # For non-path arguments, add them as-is (after flag checks)
                     validated_args.append(arg)
 
             return command, validated_args
 
-        except ValueError as e:
+        except ValueError as e: # Error during shlex.split
             raise CommandSecurityError(f"Invalid command format: {str(e)}") from e
+        # Catch CommandSecurityError explicitly to avoid wrapping it
+        except CommandSecurityError:
+             raise
+        # Catch other unexpected errors during validation
+        except Exception as e:
+            raise CommandSecurityError(f"Unexpected error validating command '{command_string}': {e}") from e
 
     def _is_path_safe(self, path: str) -> bool:
-        """Checks if a given path is safe to access within allowed directory boundaries."""
+        """
+        Checks if a given absolute path is safe (starts with the primary allowed directory).
+        Assumes path is already absolute and realpath'd by the caller.
+        """
         try:
-            # Resolve any symlinks and get absolute path
-            real_path = os.path.abspath(os.path.realpath(path))
-            allowed_dir_real = os.path.abspath(os.path.realpath(self.allowed_dir))
-
-            # Check if the path starts with allowed_dir
-            return real_path.startswith(allowed_dir_real)
+            # Ensure the primary allowed dir path ends with a separator for proper prefix check
+            # This prevents allowing '/allowed/dir-suffix' if '/allowed/dir' is allowed.
+            allowed_prefix = os.path.join(self.primary_allowed_dir, '')
+            # Check if the resolved path starts with the allowed directory prefix
+            return path.startswith(allowed_prefix) or path == self.primary_allowed_dir
         except Exception:
+            # Should not happen if path is already absolute, but good practice
             return False
 
 
 def load_security_config() -> SecurityConfig:
-    """Loads security configuration from environment variables with default fallbacks."""
-    allowed_commands = os.getenv("ALLOWED_COMMANDS", "ls,cat,pwd")
-    allowed_flags = os.getenv("ALLOWED_FLAGS", "-l,-a,--help")
+    """Loads security configuration for command execution from environment variables."""
+    allowed_commands_str = os.getenv("ALLOWED_COMMANDS", "ls,cat,pwd,echo")
+    allowed_flags_str = os.getenv("ALLOWED_FLAGS", "-l,-a,-h,--help")
+    max_command_length_str = os.getenv("MAX_COMMAND_LENGTH", "1024")
+    command_timeout_str = os.getenv("COMMAND_TIMEOUT", "60")
 
-    allow_all_commands = allowed_commands.lower() == "all"
-    allow_all_flags = allowed_flags.lower() == "all"
+    allow_all_commands = allowed_commands_str.lower() == "all"
+    allow_all_flags = allowed_flags_str.lower() == "all"
 
+    allowed_commands_set = set()
+    if not allow_all_commands:
+        allowed_commands_set = set(c.strip() for c in allowed_commands_str.split(",") if c.strip())
+
+    allowed_flags_set = set()
+    if not allow_all_flags:
+        allowed_flags_set = set(f.strip() for f in allowed_flags_str.split(",") if f.strip())
+
+    try:
+        max_command_length = int(max_command_length_str)
+        command_timeout = int(command_timeout_str)
+    except ValueError as e:
+        # Provide a more informative error if conversion fails
+        raise ValueError(f"Invalid integer value in environment variable for security config: {e}") from e
+
+    # Instantiate Pydantic model - validation happens here
     return SecurityConfig(
-        allowed_commands=set() if allow_all_commands else set(allowed_commands.split(",")),
-        allowed_flags=set() if allow_all_flags else set(allowed_flags.split(",")),
-        max_command_length=int(os.getenv("MAX_COMMAND_LENGTH", "1024")),
-        command_timeout=int(os.getenv("COMMAND_TIMEOUT", "30")),
+        allowed_commands=allowed_commands_set,
+        allowed_flags=allowed_flags_set,
+        max_command_length=max_command_length,
+        command_timeout=command_timeout,
         allow_all_commands=allow_all_commands,
         allow_all_flags=allow_all_flags,
     )
