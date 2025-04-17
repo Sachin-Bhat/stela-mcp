@@ -23,6 +23,8 @@ STeLA MCP implements the Model Context Protocol (MCP) architecture to provide a 
 * **Security-First Design**: Strict path validation and command execution controls
 * **File Search**: Search for files matching a pattern
 * **File Edit**: Make selective edits to a file
+* **Type Safety**: Strong type checking with Pydantic models for all tool inputs
+* **Path Validation**: Enhanced symlink and parent directory validation
 
 ## Installation
 
@@ -38,6 +40,7 @@ npx -y @smithery/cli install @Sachin-Bhat/stela-mcp --client claude
 
 * Python 3.10 - 3.12
 * pip or uv package manager
+* Pydantic v2.x
 
 ### Installation Steps
 
@@ -355,6 +358,8 @@ STeLA MCP provides direct access to execute commands and file operations on the 
 * Implement path validation to prevent unauthorized access to system files
 * Use the most restrictive configuration possible for your use case
 * Regularly review and update allowed commands and directories
+* Validate symlinks to prevent access outside allowed directories
+* Ensure parent directory checks for file creation operations
 
 ### Platform-Specific Security Notes
 
@@ -376,18 +381,25 @@ STeLA MCP provides direct access to execute commands and file operations on the 
 
 To extend STeLA MCP with additional functionality, follow this pattern:
 
-1. Add a new method to the appropriate class in `shell.py` or `filesystem.py`
-2. Register the tool in `server.py` using the `@server.call_tool()` decorator
-3. Implement the tool handler with proper error handling and return types
+1. Define a Pydantic model for the tool's input parameters in `server.py`
+2. Add a new method to the appropriate class in `shell.py` or `filesystem.py`
+3. Register the tool in `server.py` using the `@server.call_tool()` decorator
+4. Implement the tool handler with proper error handling and return types
 
 Example:
 ```python
+from pydantic import BaseModel, Field
+
+class MyToolInput(BaseModel):
+    param1: str = Field(description="Description of param1")
+    param2: int = Field(description="Description of param2")
+
 @server.call_tool()
-async def my_tool(request: Request[RequestParams, str], arguments: Dict[str, Any]) -> Dict[str, Any]:
+async def my_tool(request: Request[MyToolInput, str], arguments: MyToolInput) -> Dict[str, Any]:
     """Description of the tool."""
     try:
         # Tool implementation
-        result = await do_something(arguments)
+        result = await do_something(arguments.param1, arguments.param2)
         return {"success": True, "result": result}
     except Exception as e:
         return {"error": str(e)}
