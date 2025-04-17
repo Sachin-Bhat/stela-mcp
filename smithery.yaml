@@ -3,14 +3,27 @@
 startCommand:
   type: stdio
   configSchema:
-    # JSON Schema defining the configuration options for the MCP.
-    {}
+    type: object
+    properties:
+      allowed_dir:
+        type: string
+        description: "Primary directory for command execution context"
+        default: "/app"
+      allowed_dirs:
+        type: string
+        description: "Comma-separated list of allowed directories"
+        default: "/app"
   commandFunction:
     # A JS function that produces the CLI command based on the given config to start the MCP on stdio.
     |-
     (config) => ({
       command: 'python',
       args: ['-m', 'src.stela_mcp.server'],
-      env: {}
+      env: {
+        ALLOWED_DIR: config.allowed_dir || '/app',
+        ALLOWED_DIRS: config.allowed_dirs || '/app'
+      }
     })
-  exampleConfig: {}
+  exampleConfig:
+    allowed_dir: "/app"
+    allowed_dirs: "/app"
