@@ -3,6 +3,9 @@
 # Use an official Python runtime as a parent image
 FROM python:3.12-slim
 
+# Create a non-root user
+RUN useradd -m -s /bin/bash appuser
+
 # Set working directory
 WORKDIR /app
 
@@ -19,6 +22,12 @@ RUN pip install --upgrade pip
 
 # Install the package in editable mode
 RUN pip install -e .
+
+# Create a directory for mounting external volumes
+RUN mkdir -p /mnt/data && chown appuser:appuser /mnt/data
+
+# Switch to non-root user
+USER appuser
 
 # Expose ports if needed (MCP communicates over stdio, so not strictly necessary)
 
